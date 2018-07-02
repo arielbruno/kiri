@@ -27,11 +27,11 @@ info:
     understand and interact with the remote service with a minimal amount of implementation logic. Similar to what
     interfaces have done for lower-level programming, OpenAPI removes the guesswork in calling the service.
 
-  version: '1.0.0' # Your API version
+  version: '0.0.4' # Your API version
   # It can be any string but it is better to use semantic versioning: http://semver.org/
   # Warning: OpenAPI require version to be string, but without quotation YAML can recognize it as number.
 
-  title: Example.com # Replace with your API title
+  title: KiriStore Docs # Replace with your API title
   # Keep it simple. Don't add "API" or verison at the end of the string.
 
   termsOfService: 'https://example.com/terms/' # [Optional] Replace with an URL to your ToS
@@ -182,6 +182,98 @@ paths:
         '404':
           description: User not found
   
+  '/esta/{username1}': # path parameter in curly braces
+    # documentation for GET operation for this path
+    
+    # parameters list that are used with each operation for this path
+    parameters:
+      - name: pretty_print
+        in: query # place where paramter is passed: path, header, query or body, formData
+        description: Pretty print response
+        # type of the paramter: string, number, integer, boolean, array
+        type: boolean
+    get:
+      tags:
+        - poi
+      
+      # summary is up to 120 symbold but we recommend to be shortest as possible
+      summary: Get user by user name
+      
+      # you can use GFM in operation description too: https://guides.github.com/features/mastering-markdown
+      description: | 
+        Some description of the operation. 
+        You can use `markdown` here.
+      
+      # operationId should be unique across the whole specification
+      operationId: getUserByName2
+      
+      # list of parameters for the operation
+      parameters:
+        - name: username1
+          in: path
+          description: 'The name that needs to be fetched'
+          required: true
+          type: string
+        - name: with_email
+          in: query
+          description: Filter users without email
+          type: boolean
+      
+      # security schemas applied to this operation
+      security:
+        - main_auth:
+          - 'read:users' # for auth2 provide list of scopes here
+        - api_key: []
+      # overwriting default global produces
+      produces:
+        - application/json
+      responses: # list of responses
+        '200':
+          description: Success
+          schema: # response schema can be specified for each response
+            $ref: '#/definitions/User'
+          examples:
+          # repsonse samples for each type operation produces
+            application/json:
+              username: user1
+              email: user@example.com
+        '403':
+          description: Forbidden
+        '404':
+          description: User not found
+    # documentation for PUT operation for this path
+    put:
+      tags:
+        - poi
+      summary: Updated user
+      description: This can only be done by the logged in user.
+      operationId: updateUser1
+      produces:
+        - application/json
+      parameters:
+        - name: username1
+          in: path
+          description: The name that needs to be updated
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Updated user object
+          required: true
+          # for body parameter you should specify request schema instead of type
+          schema:
+            $ref: '#/definitions/User'
+      security:
+        - main_auth:
+          - 'write:users'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Invalid user supplied
+        '404':
+          description: User not found
+  
   '/echo':
     post:
       tags:
@@ -216,6 +308,8 @@ paths:
               type: string
               format: date-time
               description: date in UTC when token expires
+              
+              
 # An object to hold data types that can be consumed and produced by operations.
 # These data types can be primitives, arrays or models.
 definitions:
@@ -227,6 +321,11 @@ definitions:
   User:
     type: object
     properties:
+      username1:
+        description: User supplied username
+        type: string
+        minLength: 4
+        example: John78
       username:
         description: User supplied username
         type: string
